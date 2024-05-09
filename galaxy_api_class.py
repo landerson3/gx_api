@@ -55,6 +55,8 @@ class gx_api():
 		r = requests.delete(f'{self.host}/fmi/data/{self.version}/databases/{self.database}/sessions/{self.token}',)
 
 	def find_records(self,params, layout = "RT_API_View", offset = 0, limit = 500):
+		if self.database == 'GALAXY_WEB_Assortment' and layout == 'RT_API_View':
+			layout = 'Product_Assortment-Detail_View'
 		# if self._find_result = []
 		# find records matching the provided parameters and return the files as a json
 		# https://galaxy.restorationhardware.com/fmi/data/apidoc/#operation/find
