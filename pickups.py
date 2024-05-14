@@ -29,8 +29,12 @@ response = gx.find_records(p, layout = 'Product_Assortment-Detail_View')
 if 'response' in response and 'data' in response['response'] and len(response['response']['data']) > 0:
 	for _record in response['response']['data']:
 		record = _record['fieldData']
-		if record['DonorProdID'] == '': continue
-		donor_pickup_map[record['wm_Web_ProdID']] = record['DonorProdID']
+		if 'cat' in record['wm_Web_ProdID']: continue
+		if record['wm_Pickup_Source'] == '': continue
+		donor_prod = re.search(r'(rhbc_)?(rhtn_)?prod\d+',record['wm_Pickup_Source'])
+		if donor_prod == None: continue
+		donor_prod = donor_prod.group(0)
+		donor_pickup_map[record['wm_Web_ProdID']] = donor_prod
 
 final_list = []
 for k,v in zip(donor_pickup_map.keys(), donor_pickup_map.values()):
