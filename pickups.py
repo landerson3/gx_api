@@ -3,6 +3,7 @@ sys.path.insert(0,os.path.expanduser('~'))
 # GALAXY_WEB_Assortment
 from gx_api import galaxy_api_class
 from rh_atg_api import rh_atg_api
+from box_api import box_api_class
 # gx = galaxy_api_class.gx_api( production = True )
 gx = galaxy_api_class.gx_api( database = 'GALAXY_WEB_Assortment', production = True)
 rh_atg = rh_atg_api.rh_atg_wrapper()
@@ -53,5 +54,10 @@ with open(output,'a') as csv:
 	for item in final_list:
 		csv.write(f'{item[0]},"{item[1]}"\n')
 
-
+t = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+new_path = os.path.expanduser(f'~/Desktop/product_image_check_{t}.csv')
+os.rename(output, new_path)
+box = box_api_class.box_api()
+box.upload(new_path,265081413296)
+os.remove(new_path)
 # get the ATG images from the pickup and build the bcc import doc
