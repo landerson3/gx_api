@@ -12,10 +12,11 @@ delta = datetime.timedelta(90)
 end_date = (datetime.datetime.today()+delta).strftime("%m/%d/%Y")
 p = {
 		'query':[{
-		'c_WA_Launch_Date_Earliest' : f'>{start_date}',
+		'c_WA_Launch_Date_Earliest' : f'>={start_date}',
 		'wm_Product_Status' : 'In Assortment',
 		'wm_ImageSource' : 'Pickup',
-		'DonorProdID' : '*',
+		# 'DonorProdID' : '*',
+		'wm_Pickup_Source':'*',
 		'omit' : 'false'
 	},
 	{
@@ -32,17 +33,33 @@ if 'response' in response and 'data' in response['response'] and len(response['r
 		if 'cat' in record['wm_Web_ProdID']: continue
 		if record['wm_Pickup_Source'] == '': continue
 		donor_prod = re.search(r'(rhbc_)?(rhtn_)?prod\d+',record['wm_Pickup_Source'])
-		if donor_prod == None: continue
-		donor_prod = donor_prod.group(0)
+		swatch_donor = None
+		if donor_prod == None:
+			if re.match(r'\d+',record['wm_Pickup_Source']) is not None:
+				swatch_donor = record['wm_Pickup_Source']
+			else:
+				swatch_donor = re.search(r'_\d+_', record['wm_Pickup_Source'])
+				if swatch_donor is not None:
+					swatch_donor = swatch_donor.group(0).replace('_','')
+		if donor_prod == None and swatch_donor == None: continue
+		if donor_prod != None:
+			donor_prod = donor_prod.group(0)
+		else:
+			donor_prod = swatch_donor
 		donor_pickup_map[record['wm_Web_ProdID']] = donor_prod
 
 final_list = []
 for k,v in zip(donor_pickup_map.keys(), donor_pickup_map.values()):
-
-	info = rh_atg.get_product_info(v)
-	if not info == None and 'alternateImages' in info:
+	if re.match(r'\d+',v) is not None:
+		info = rh_atg.get_swatch_image(v)
+	else:
+		info = rh_atg.get_product_info(v)
+	if not info == None:
+		if 'alternateImages' in info:
 		# images = [re.sub(r'.*/',"",i['imageUrl']).replace('_RHR','') for i in info['alternateImages']]
-		images = [i['imageId'] for i in info['alternateImages']]
+			images = [i['imageId'] for i in info['alternateImages']]
+		else:
+			images = [info,]
 		if len(images) == 0: continue
 		else:
 			final_list.append((k,",".join(images)))
