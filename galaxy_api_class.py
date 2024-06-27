@@ -54,7 +54,7 @@ class gx_api():
 		logging.info("Logging out of GX.")
 		r = requests.delete(f'{self.host}/fmi/data/{self.version}/databases/{self.database}/sessions/{self.token}',)
 
-	def find_records(self,params, layout = "RT_API_View", offset = 0, limit = 500):
+	def find_records(self, params:dict, layout:str = "RT_API_View", offset:int = 0, limit:int = 500) -> dict|requests.Response:
 		if self.database == 'GALAXY_WEB_Assortment' and layout == 'RT_API_View':
 			layout = 'Product_Assortment-Detail_View'
 		# if self._find_result = []
